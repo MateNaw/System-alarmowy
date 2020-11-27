@@ -53,10 +53,14 @@ class Device(object):
         gas1 = self.chan1.value
         gas2 = self.chan2.value
         print(f"anlog gas1: {gas1} analog gas2: {gas2}")
+
         move = GPIO.input(self.PIR_PIN)
         temp = self.meas_temp()
+        print(f"temp: {temp}")
+
         window1 = False
         window2 = False
+        print(f"window1: {window1} window2: {window2} move: {move}")
 
         alarm = self.alarm
         if window2 or window1 or move:

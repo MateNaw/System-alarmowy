@@ -1,19 +1,14 @@
 #!/usr/bin/python3
 import signal
 from time import *
-import board
-import digitalio
-import busio
 import RPi.GPIO as GPIO
-
-import adafruit_mcp3xxx.mcp3008 as MCP
-from adafruit_mcp3xxx.analog_in import AnalogIn
 from measurement import Measurement
-from raspberry.device import Device
+from device import Device
 
 
 def send_data(data):
     print(f"Sending {data}")
+
 def raise_alarm():
     print(f"Alarm")
 
