@@ -4,21 +4,30 @@ from time import *
 import RPi.GPIO as GPIO
 from measurement import Measurement
 from device import Device
-
+from .network import Network, ws_url
+import asyncio
+import websockets
 
 def send_data(data):
     print(f"Sending {data}")
-
-def raise_alarm():
-    print(f"Alarm")
 
 
 def cleanExit():
     GPIO.cleanup()
     print('Exit!')
 
+class Alarm:
+    def __init__(self):
+        self.alarm = False
 
-def loop(measurement, device):
+    def raise_alarm(self):
+        print(f"Alarm")
+        self.alarm = True
+
+alarm = Alarm()
+
+
+def loop(measurement, device, network):
     try:
         live = True
         count = 30
@@ -27,12 +36,13 @@ def loop(measurement, device):
             measurement.save(**res)
 
             if res['alarm']:
-                raise_alarm()
+                alarm.raise_alarm()
+                network.send(measurement.get())
 
             if count:
                 count -= 1
             else:
-                send_data(measurement.get())
+                network.send(measurement.get())
                 count = 30
             sleep(1)
     except KeyboardInterrupt:
@@ -45,7 +55,10 @@ def loop(measurement, device):
 def main():
     measurement = Measurement()
     device = Device()
-    loop(measurement, device)
+    network = Network()
+
+    asyncio.get_event_loop().run_until_complete(network.command_receiver(alarm))
+    loop(measurement, device, network)
     cleanExit()
 
 
