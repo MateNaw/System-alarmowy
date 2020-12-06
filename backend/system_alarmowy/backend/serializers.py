@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
-from .models import Measurement, Sensor
+from .models import Measurement
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -44,12 +44,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
-class SensorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Sensor
-        fields = ['id', 'sensor_type', 'location']
 
 class MeasurementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Measurement
-        fields = ['id', 'measured_value', 'sensor', 'time']
+        fields = ['id', 'temperature', 'gas', 'localization', 'windows', 'alert', 'time']

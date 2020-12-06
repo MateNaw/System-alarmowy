@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
 from rest_framework import status
-from .models import Measurement, Sensor
-from .serializers import MeasurementSerializer, SensorSerializer, CustomUserSerializer
+from .models import Measurement
+from .serializers import MeasurementSerializer, CustomUserSerializer
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.parsers import JSONParser
@@ -77,38 +77,6 @@ def measurement_details(request, pk):
         return HttpResponse(status=404)
     if request.method == 'GET':
         serializer = MeasurementSerializer(data)
-        return JsonResponse(serializer.data)
-    elif request.method == 'DELETE':
-        data.delete()
-        return HttpResponse(status=204)
-
-@api_view(['GET', 'POST'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def sensor_list(request):
-    if request.method == 'GET':
-        data = Sensor.objects.all()
-        serializer = SensorSerializer(data, many=True)
-        return JsonResponse(serializer.data, safe=False)
-    elif request.method == 'POST':
-        data = JSONParser().parse(request)
-        serializer = SensorSerializer(data)
-        if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data, status=201)
-        return JsonResponse(serializer.errors, status=400)
-
-
-@api_view(['GET', 'DELETE'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def sensor_details(request, pk):
-    try:
-        data = Sensor.objects.filter(pk=pk)
-    except Sensor.DoesNotExist:
-        return HttpResponse(status=404)
-    if request.method == 'GET':
-        serializer = SensorSerializer(data)
         return JsonResponse(serializer.data)
     elif request.method == 'DELETE':
         data.delete()
