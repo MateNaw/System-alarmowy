@@ -8,6 +8,7 @@ urlpatterns = [
     path('login/', views.CustomObtainAuthToken.as_view()),
     path('measurements', views.measurement_list),
     path('measurements/<int:pk>', views.measurement_details),
+    path('recent/<int:location>', views.recent_measurement),
     # path('sensors', views.sensor_list),
     # path('sensors/<int:pk>', views.sensor_details),
 ]

@@ -52,8 +52,8 @@ class CustomObtainAuthToken(ObtainAuthToken):
         return Response({'token': token.key, 'id': token.user_id, 'is_admin': user.is_superuser})
 
 @api_view(['GET', 'POST'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
+#@authentication_classes([TokenAuthentication])
+#@permission_classes([IsAuthenticated])
 def measurement_list(request):
     if request.method == 'GET':
         data = Measurement.objects.all()
@@ -73,6 +73,24 @@ def measurement_list(request):
 def measurement_details(request, pk):
     try:
         data = Measurement.objects.filter(pk=pk)
+    except Measurement.DoesNotExist:
+        return HttpResponse(status=404)
+    if request.method == 'GET':
+        serializer = MeasurementSerializer(data)
+        return JsonResponse(serializer.data)
+    elif request.method == 'DELETE':
+        data.delete()
+        return HttpResponse(status=204)
+
+@api_view(['GET', 'DELETE'])
+def recent_measurement(request, location):
+    try:
+        data = Measurement.objects.filter(location=location)
+        try:
+            data = sorted(data, key= lambda x : x.time, reverse=True)
+            data = data[0]
+        except IndexError:
+            data = []
     except Measurement.DoesNotExist:
         return HttpResponse(status=404)
     if request.method == 'GET':

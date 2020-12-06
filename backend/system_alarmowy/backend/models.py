@@ -8,7 +8,7 @@ from rest_framework.authtoken.models import Token
 # Create your models here.
 
 class Measurement(models.Model):
-    localization = models.IntegerField()
+    location = models.IntegerField()
     temperature = models.FloatField()
     gas = models.FloatField()
     alarm = models.BooleanField(default=False)

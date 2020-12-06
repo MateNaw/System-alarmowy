@@ -48,4 +48,4 @@ class CustomUserSerializer(serializers.ModelSerializer):
 class MeasurementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Measurement
-        fields = ['id', 'temperature', 'gas', 'localization', 'windows', 'alert', 'time']
+        fields = ['id', 'temperature', 'gas', 'location', 'windows', 'alarm', 'time']
