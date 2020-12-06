@@ -9,8 +9,8 @@ from rest_framework.authtoken.models import Token
 
 class Measurement(models.Model):
     localization = models.IntegerField()
-    temperature = models.IntegerField()
-    gas = models.IntegerField()
+    temperature = models.FloatField()
+    gas = models.FloatField()
     alarm = models.BooleanField(default=False)
     windows = models.BooleanField(default=False)
     time = models.DateTimeField(default=datetime.now)
