@@ -3,6 +3,9 @@ import tkinter as tk
 from PIL import ImageTk, Image
 import tkinter.font as tkFont
 from tkinter import messagebox
+import requests
+import json
+
 
 gas = 0
 temp = 20
@@ -49,15 +52,32 @@ def help_button_clicked():
                         "Additionally you are able to turn on/off monitoring system" +
                         "and arm the alarm")
 
+def refresh():
+    resp=requests.get(url="http://127.0.0.1:8000/recent/{}".format(label_loc['text']), 
+    headers={'Content-Type': 'application/json'})
+    jdata=resp.json()
+    print(jdata)
+    label_gas.config(text=str(jdata['gas']))
+    label_temp.config(text=str(jdata['temperature']))
+    alarm_state = jdata['alarm']
+    window_state = jdata['windows']
+    update_values()
+    root.after(10000, refresh)
+
+
 
 def update_values():
     label_loc.config(text=str(loc))
     if alarm_state:
-        text2 = "Arm the alarm"
+        text2 = "Disarm the alarm"
         label_alarm.config(text="armed")
     else:
-        text2 = "Disarm the alarm"
+        text2 = "Arm the alarm"
         label_alarm.config(text="unarmed")
+    if window_state:
+        label_window.config(text="Closed")
+    else:
+        label_window.config(text="Open")
     arm_button.config(text=text2)
     if switch_state:
         text3 = "Turn on"
@@ -106,9 +126,9 @@ down_arrow_button.place(x=413, y=67)
 help_button = tk.Button(root, image=help_icon, command=help_button_clicked)
 help_button.place(x=50, y=300)
 if alarm_state:
-    text = "Arm the alarm"
-else:
     text = "Disarm the alarm"
+else:
+    text = "Arm the alarm"
 arm_button = tk.Button(root, text=text, font="Helvetica", command=arm_button_clicked)
 arm_button.config(height=3, width=13, bg="#C9ECEA")
 arm_button.place(x=700, y=300)
@@ -129,7 +149,7 @@ panel = tk.Label(root, image=window_icon)
 panel.place(x=525, y=150)
 panel = tk.Label(root, image=alarm_icon)
 panel.place(x=675, y=150)
-
+root.after(1000, refresh)
 root.mainloop()
 
 
