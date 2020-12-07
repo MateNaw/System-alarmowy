@@ -58,11 +58,15 @@ def measurement_list(request):
         serializer = MeasurementSerializer(data, many=True)
         return JsonResponse(serializer.data, safe=False)
     elif request.method == 'POST':
+        print(request)
         data = JSONParser().parse(request)
-        serializer = MeasurementSerializer(data)
+        print(data)
+        serializer = MeasurementSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=201)
+        else:
+            print('else')
         return JsonResponse(serializer.errors, status=400)
 
 @api_view(['GET',])

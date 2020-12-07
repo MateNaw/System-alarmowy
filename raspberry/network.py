@@ -1,15 +1,17 @@
 import asyncio
 import websockets
+import requests
 
-ws_url = "ws://localhost:8000/measurement/"
+ws_url = "ws://localhost:8000/socket/"
+
 
 class Network():
     def __init__(self):
-        async with websockets.connect(ws_url) as websocket:
-            self.websocket = websocket
+        self.websocket = websockets.connect(ws_url)
 
     def send(self, data):
-        await self.websocket.send(data)
+        # await self.websocket.send(data)
+        requests.put(url='localhost:8080')
 
     def recv(self):
         return None
@@ -23,3 +25,4 @@ class Network():
                 if not msg['alarm']:
                     alarm.alarm = False
             await self.websocket.send({'done': True})
+

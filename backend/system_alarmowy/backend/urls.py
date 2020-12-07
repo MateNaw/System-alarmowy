@@ -1,7 +1,9 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
+from django.urls import re_path
 
+from . import channel
 
 
 urlpatterns = [
@@ -14,6 +16,12 @@ urlpatterns = [
     path('dates/<str:start_time>/<str:end_time>', views.measurement_dates),
     path('alarms', views.alarm_list),
     path('alarms/<int:location>', views.alarm_details),
+    path('alarms/<int:location>', views.alarm_details),
     # path('sensors', views.sensor_list),
     # path('sensors/<int:pk>', views.sensor_details),
+]
+
+
+websocket_urlpatterns = [
+    re_path('socket/', channel.MeasurementConsumer.as_asgi()),
 ]
