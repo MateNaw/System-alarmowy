@@ -1,8 +1,11 @@
 import tkinter
 import tkinter as tk
+from tkinter.messagebox import showerror
+
+from tkcalendar import *
 from PIL import ImageTk, Image
 import tkinter.font as tkFont
-from tkinter import messagebox
+from tkinter import messagebox, DISABLED
 import requests
 import json
 import pandas as pd
@@ -15,15 +18,24 @@ alarm_state = False
 window_state = False
 switch_state = False
 
+
 def up_arrow_button_clicked():
     global loc
     loc = loc + 1
+    if loc >= 2:
+        up_arrow_button.config(state=DISABLED)
+    if loc == 2:
+        down_arrow_button.config(state=tkFont.NORMAL)
     update_values()
 
 
 def down_arrow_button_clicked():
     global loc
     loc = loc - 1
+    if loc < 2:
+        up_arrow_button.config(state=tkFont.NORMAL)
+    if loc >= 1:
+        down_arrow_button.config(state=DISABLED)
     update_values()
 
 
@@ -52,26 +64,39 @@ def help_button_clicked():
                         "Additionally you are able to turn on/off monitoring system" +
                         "and arm the alarm")
 
+
+def export_button_clicked():
+    start = cal1.get_date().replace("/", "-") + "T23:59:59Z"
+    end = cal2.get_date().replace("/", "-") + "T23:59:59Z"
+    filename = entry.get()
+    if filename == "":
+        showerror(title="Error", message="No file name found")
+        return
+    export_data(start, end, filename)
+
+
 def refresh():
-    resp=requests.get(url="http://127.0.0.1:8000/recent/{}".format(label_loc['text']), 
-    headers={'Content-Type': 'application/json'})
-    jdata=resp.json()
+    resp = requests.get(url="http://127.0.0.1:8000/recent/{}".format(label_loc['text']),
+    headers = {'Content-Type': 'application/json'})
+    jdata = resp.json()
     print(jdata)
     label_gas.config(text=str(jdata['gas']))
     label_temp.config(text=str(jdata['temperature']))
     alarm_state = jdata['alarm']
     window_state = jdata['windows']
     update_values()
-    root.after(10000, refresh)
+    #root.after(10000, refresh)
+
 
 def export_data(start_time, end_time, filename):
     resp=requests.get(url="http://127.0.0.1:8000/dates/{}/{}".format(start_time, end_time), 
     headers={'Content-Type': 'application/json'})
-    jdata=resp.json()
+    jdata = resp.json()
     print(jdata)
     df = pd.DataFrame().from_records(jdata)
     print(df)
-    df.to_csv (r"exported/{}.csv".format(filename), index = None)
+    df.to_csv(r"exported/{}.csv".format(filename), index = None)
+
 
 def update_values():
     label_loc.config(text=str(loc))
@@ -95,9 +120,9 @@ def update_values():
 
 root = tk.Tk()
 font_style_labels = tkFont.Font(root=root, family="Helvetica", size=25)
-canvas = tk.Canvas(root, height=400, width=1000, bg="#C9ECEA")
+canvas = tk.Canvas(root, height=650, width=1000, bg="#C9ECEA")
 canvas.pack()
-export_data("2020-11-22T13:27:10Z", "2020-11-27T13:27:10Z", "filename")
+#export_data("2020-11-22T13:27:10Z", "2020-11-27T13:27:10Z", "filename")
 # Labels
 label_location = tk.Label(root, bg="#C9ECEA", text="Current room number: ", font=font_style_labels)
 label_location.place(x=50, y=50)
@@ -109,6 +134,19 @@ label_temp = tk.Label(root, bg="#C9ECEA", text=str(temp), font=font_style_labels
 label_temp.place(x=405, y=250)
 label_window = tk.Label(root, bg="#C9ECEA", text="closed", font=font_style_labels)
 label_window.place(x=525, y=250)
+label_window = tk.Label(root, bg="#C9ECEA", text="Export data section:", font=font_style_labels)
+label_window.place(x=50, y=350)
+label_from = tk.Label(root, bg="#C9ECEA", text="From:", font=font_style_labels)
+label_from.place(x=50, y=400)
+label_to = tk.Label(root, bg="#C9ECEA", text="To:", font=font_style_labels)
+label_to.place(x=400, y=400)
+label_name = tk.Label(root, bg="#C9ECEA", text="file name:", font=font_style_labels)
+label_name.place(x=750, y=400)
+
+# Entrys
+entry = tk.Entry(root, font=font_style_labels)
+entry.place(x=750, y=450)
+
 if alarm_state:
     text = "armed"
 else:
@@ -124,14 +162,23 @@ temp_icon = ImageTk.PhotoImage(Image.open("./icons/temp_icon.jpg"))
 window_icon = ImageTk.PhotoImage(Image.open("./icons/window_icon.png"))
 alarm_icon = ImageTk.PhotoImage(Image.open("./icons/alarm_icon.png"))
 help_icon = ImageTk.PhotoImage(Image.open("./icons/help_icon.png"))
+export_icon = ImageTk.PhotoImage(Image.open("./icons/export_icon.png"))
+
+# calendars
+cal1 = Calendar(root, selectmode="day", year=2020, month=12, day=8)
+cal1.place(x=50, y=450)
+cal2 = Calendar(root, selectmode="day", year=2020, month=12, day=8)
+cal2.place(x=400, y=450)
 
 # Buttons
 up_arrow_button = tk.Button(root, command=up_arrow_button_clicked, image=up_arrow_img)
 up_arrow_button.place(x=413, y=42)
-down_arrow_button = tk.Button(root, command=down_arrow_button_clicked, image=down_arrow_img)
+down_arrow_button = tk.Button(root, command=down_arrow_button_clicked, image=down_arrow_img, state=DISABLED)
 down_arrow_button.place(x=413, y=67)
 help_button = tk.Button(root, image=help_icon, command=help_button_clicked)
 help_button.place(x=50, y=300)
+export_button = tk.Button(root, image=export_icon, command=export_button_clicked)
+export_button.place(x=750, y=500)
 if alarm_state:
     text = "Disarm the alarm"
 else:
@@ -156,7 +203,8 @@ panel = tk.Label(root, image=window_icon)
 panel.place(x=525, y=150)
 panel = tk.Label(root, image=alarm_icon)
 panel.place(x=675, y=150)
-root.after(1000, refresh)
+#root.after(1000, refresh)
+
 root.mainloop()
 
 
