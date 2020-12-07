@@ -1,7 +1,7 @@
 import tkinter
 import tkinter as tk
 from tkinter.messagebox import showerror
-
+import datetime
 from tkcalendar import *
 from PIL import ImageTk, Image
 import tkinter.font as tkFont
@@ -66,8 +66,8 @@ def help_button_clicked():
 
 
 def export_button_clicked():
-    start = cal1.get_date().replace("/", "-") + "T23:59:59Z"
-    end = cal2.get_date().replace("/", "-") + "T23:59:59Z"
+    start = datetime.datetime.strptime(cal1.get_date(), '%d.%m.%Y').strftime('%Y-%m-%d') + "T23:59:59Z"
+    end = datetime.datetime.strptime(cal2.get_date(), '%d.%m.%Y').strftime('%Y-%m-%d') + "T23:59:59Z"
     filename = entry.get()
     if filename == "":
         showerror(title="Error", message="No file name found")
@@ -79,22 +79,19 @@ def refresh():
     resp = requests.get(url="http://127.0.0.1:8000/recent/{}".format(label_loc['text']),
     headers = {'Content-Type': 'application/json'})
     jdata = resp.json()
-    print(jdata)
     label_gas.config(text=str(jdata['gas']))
     label_temp.config(text=str(jdata['temperature']))
     alarm_state = jdata['alarm']
     window_state = jdata['windows']
     update_values()
-    #root.after(10000, refresh)
+    root.after(10000, refresh)
 
 
 def export_data(start_time, end_time, filename):
     resp=requests.get(url="http://127.0.0.1:8000/dates/{}/{}".format(start_time, end_time), 
     headers={'Content-Type': 'application/json'})
     jdata = resp.json()
-    print(jdata)
     df = pd.DataFrame().from_records(jdata)
-    print(df)
     df.to_csv(r"exported/{}.csv".format(filename), index = None)
 
 
