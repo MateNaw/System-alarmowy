@@ -8,12 +8,17 @@ from rest_framework.authtoken.models import Token
 # Create your models here.
 
 class Measurement(models.Model):
-    sensor = models.ForeignKey('Sensor', on_delete=models.PROTECT)
-    measured_value = models.IntegerField()
+    location = models.IntegerField()
+    temperature = models.FloatField()
+    gas = models.FloatField()
+    alarm = models.BooleanField(default=False)
+    windows = models.BooleanField(default=False)
     time = models.DateTimeField(default=datetime.now)
-class Sensor(models.Model):
-    sensor_type = models.CharField(max_length=50)
-    location = models.CharField(max_length=50)
+
+class Alarm(models.Model):
+    location = models.IntegerField()
+    time = models.DateTimeField(default=datetime.now)
+    dismissed = models.BooleanField(default=False)
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False,**kwargs):

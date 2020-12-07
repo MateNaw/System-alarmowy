@@ -7,6 +7,7 @@ from device import Device
 from network import Network, ws_url
 import asyncio
 import websockets
+from .network import Network, ws_url
 
 def send_data(data):
     print(f"Sending {data}")

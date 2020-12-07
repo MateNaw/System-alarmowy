@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
 from rest_framework import status
-from .models import Measurement, Sensor
-from .serializers import MeasurementSerializer, SensorSerializer, CustomUserSerializer
+from .models import Measurement, Alarm
+from .serializers import MeasurementSerializer, CustomUserSerializer, AlarmSerializer
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.parsers import JSONParser
@@ -52,8 +52,6 @@ class CustomObtainAuthToken(ObtainAuthToken):
         return Response({'token': token.key, 'id': token.user_id, 'is_admin': user.is_superuser})
 
 @api_view(['GET', 'POST'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
 def measurement_list(request):
     if request.method == 'GET':
         data = Measurement.objects.all()
@@ -67,9 +65,14 @@ def measurement_list(request):
             return JsonResponse(serializer.data, status=201)
         return JsonResponse(serializer.errors, status=400)
 
+@api_view(['GET',])
+def measurement_alarms(request):
+    if request.method == 'GET':
+        data = Measurement.objects.filter(alarm=True)
+        serializer = MeasurementSerializer(data, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
 @api_view(['GET', 'DELETE'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
 def measurement_details(request, pk):
     try:
         data = Measurement.objects.filter(pk=pk)
@@ -82,34 +85,49 @@ def measurement_details(request, pk):
         data.delete()
         return HttpResponse(status=204)
 
-@api_view(['GET', 'POST'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def sensor_list(request):
+@api_view(['GET', 'DELETE'])
+def recent_measurement(request, location):
+    try:
+        data = Measurement.objects.filter(location=location)
+        try:
+            data = sorted(data, key= lambda x : x.time, reverse=True)
+            data = data[0]
+        except IndexError:
+            data = []
+    except Measurement.DoesNotExist:
+        return HttpResponse(status=404)
     if request.method == 'GET':
-        data = Sensor.objects.all()
-        serializer = SensorSerializer(data, many=True)
+        serializer = MeasurementSerializer(data)
+        return JsonResponse(serializer.data)
+    elif request.method == 'DELETE':
+        data.delete()
+        return HttpResponse(status=204)
+
+@api_view(['GET',])
+def measurement_dates(request, start_time, end_time):
+    if request.method == 'GET':
+        data = Measurement.objects.all().filter(time__gte=start_time).filter(time__lte=end_time)
+        serializer = MeasurementSerializer(data, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+
+@api_view(['GET', 'POST'])
+def alarm_list(request):
+    if request.method == 'GET':
+        data = Alarm.objects.all()
+        serializer =AlarmSerializer(data, many=True)
         return JsonResponse(serializer.data, safe=False)
     elif request.method == 'POST':
         data = JSONParser().parse(request)
-        serializer = SensorSerializer(data)
+        serializer = AlarmSerializer(data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data, status=201)
         return JsonResponse(serializer.errors, status=400)
 
-
-@api_view(['GET', 'DELETE'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
-def sensor_details(request, pk):
-    try:
-        data = Sensor.objects.filter(pk=pk)
-    except Sensor.DoesNotExist:
-        return HttpResponse(status=404)
+@api_view(['GET',])
+def alarm_details(request, location):
     if request.method == 'GET':
-        serializer = SensorSerializer(data)
-        return JsonResponse(serializer.data)
-    elif request.method == 'DELETE':
-        data.delete()
-        return HttpResponse(status=204)
+        data = Alarm.objects.filter(location=location)
+        serializer = AlarmSerializer(data, many=True)
+        return JsonResponse(serializer.data, safe=False)

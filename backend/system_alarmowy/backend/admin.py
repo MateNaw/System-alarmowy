@@ -1,13 +1,14 @@
 from django.contrib import admin
-from .models import Measurement, Sensor
+from .models import Measurement, Alarm
 # Register your models here.
 
 @admin.register(Measurement)
 class MeasurementAdmin(admin.ModelAdmin):
-    list_display = ['sensor', 'id', 'measured_value', 'time']
-    ordering = ['sensor', 'time','id', 'measured_value']
+    list_display = ['time', 'location', 'temperature', 'gas', 'windows', 'alarm',  'id']
+    ordering = ['time', 'location','id']
     
-@admin.register(Sensor)
-class SensorAdmin(admin.ModelAdmin):
-    list_display = ['id', 'sensor_type', 'location']
-    ordering = ['id', 'sensor_type', 'location']
+@admin.register(Alarm)
+class MeasurementAdmin(admin.ModelAdmin):
+    list_display = ['time', 'location', 'id']
+    ordering = ['time', 'location', 'id']
+    
