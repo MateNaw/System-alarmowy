@@ -38,3 +38,6 @@ transliterate==1.10.2
 virtualenv==20.0.14
 Werkzeug==1.0.1
 wrapt==1.12.1
+
+channels~=3.0.2
+websockets~=8.1
