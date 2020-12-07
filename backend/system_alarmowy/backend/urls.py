@@ -7,6 +7,7 @@ from django.contrib.auth import views as auth_views
 urlpatterns = [
     path('register/', views.CustomUserCreate.as_view(), name="create_user"),
     path('login/', views.CustomObtainAuthToken.as_view()),
+    path('alarmed_measurements', views.measurement_alarms),
     path('measurements', views.measurement_list),
     path('measurements/<int:pk>', views.measurement_details),
     path('recent/<int:location>', views.recent_measurement),

@@ -65,6 +65,13 @@ def measurement_list(request):
             return JsonResponse(serializer.data, status=201)
         return JsonResponse(serializer.errors, status=400)
 
+@api_view(['GET',])
+def measurement_alarms(request):
+    if request.method == 'GET':
+        data = Measurement.objects.filter(alarm=True)
+        serializer = MeasurementSerializer(data, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
 @api_view(['GET', 'DELETE'])
 def measurement_details(request, pk):
     try:
