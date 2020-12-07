@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
 from rest_framework import status
-from .models import Measurement
-from .serializers import MeasurementSerializer, CustomUserSerializer
+from .models import Measurement, Alarm
+from .serializers import MeasurementSerializer, CustomUserSerializer, AlarmSerializer
 from django.http import HttpResponse, JsonResponse
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.parsers import JSONParser
@@ -52,8 +52,6 @@ class CustomObtainAuthToken(ObtainAuthToken):
         return Response({'token': token.key, 'id': token.user_id, 'is_admin': user.is_superuser})
 
 @api_view(['GET', 'POST'])
-#@authentication_classes([TokenAuthentication])
-#@permission_classes([IsAuthenticated])
 def measurement_list(request):
     if request.method == 'GET':
         data = Measurement.objects.all()
@@ -68,8 +66,6 @@ def measurement_list(request):
         return JsonResponse(serializer.errors, status=400)
 
 @api_view(['GET', 'DELETE'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
 def measurement_details(request, pk):
     try:
         data = Measurement.objects.filter(pk=pk)
@@ -101,10 +97,30 @@ def recent_measurement(request, location):
         return HttpResponse(status=204)
 
 @api_view(['GET',])
-#@authentication_classes([TokenAuthentication])
-#@permission_classes([IsAuthenticated])
 def measurement_dates(request, start_time, end_time):
     if request.method == 'GET':
         data = Measurement.objects.all().filter(time__gte=start_time).filter(time__lte=end_time)
         serializer = MeasurementSerializer(data, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+
+@api_view(['GET', 'POST'])
+def alarm_list(request):
+    if request.method == 'GET':
+        data = Alarm.objects.all()
+        serializer =AlarmSerializer(data, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = AlarmSerializer(data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+@api_view(['GET',])
+def alarm_details(request, location):
+    if request.method == 'GET':
+        data = Alarm.objects.filter(location=location)
+        serializer = AlarmSerializer(data, many=True)
         return JsonResponse(serializer.data, safe=False)

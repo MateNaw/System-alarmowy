@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import serializers
-from .models import Measurement
+from .models import Measurement, Alarm
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -49,3 +49,8 @@ class MeasurementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Measurement
         fields = ['id', 'temperature', 'gas', 'location', 'windows', 'alarm', 'time']
+
+class AlarmSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Alarm
+        fields = ['id', 'time', 'location', 'dismissed']

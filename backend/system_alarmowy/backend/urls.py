@@ -11,6 +11,8 @@ urlpatterns = [
     path('measurements/<int:pk>', views.measurement_details),
     path('recent/<int:location>', views.recent_measurement),
     path('dates/<str:start_time>/<str:end_time>', views.measurement_dates),
+    path('alarms', views.alarm_list),
+    path('alarms/<int:location>', views.alarm_details),
     # path('sensors', views.sensor_list),
     # path('sensors/<int:pk>', views.sensor_details),
 ]
