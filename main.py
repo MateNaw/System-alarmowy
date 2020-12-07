@@ -5,6 +5,7 @@ import tkinter.font as tkFont
 from tkinter import messagebox
 import requests
 import json
+import pandas as pd
 
 
 gas = 0
@@ -13,7 +14,6 @@ loc = 1
 alarm_state = False
 window_state = False
 switch_state = False
-
 
 def up_arrow_button_clicked():
     global loc
@@ -64,7 +64,14 @@ def refresh():
     update_values()
     root.after(10000, refresh)
 
-
+def export_data(start_time, end_time, filename):
+    resp=requests.get(url="http://127.0.0.1:8000/dates/{}/{}".format(start_time, end_time), 
+    headers={'Content-Type': 'application/json'})
+    jdata=resp.json()
+    print(jdata)
+    df = pd.DataFrame().from_records(jdata)
+    print(df)
+    df.to_csv (r"exported/{}.csv".format(filename), index = None)
 
 def update_values():
     label_loc.config(text=str(loc))
@@ -90,7 +97,7 @@ root = tk.Tk()
 font_style_labels = tkFont.Font(root=root, family="Helvetica", size=25)
 canvas = tk.Canvas(root, height=400, width=1000, bg="#C9ECEA")
 canvas.pack()
-
+export_data("2020-11-22T13:27:10Z", "2020-11-27T13:27:10Z", "filename")
 # Labels
 label_location = tk.Label(root, bg="#C9ECEA", text="Current room number: ", font=font_style_labels)
 label_location.place(x=50, y=50)
