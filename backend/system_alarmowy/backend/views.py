@@ -99,3 +99,12 @@ def recent_measurement(request, location):
     elif request.method == 'DELETE':
         data.delete()
         return HttpResponse(status=204)
+
+@api_view(['GET',])
+#@authentication_classes([TokenAuthentication])
+#@permission_classes([IsAuthenticated])
+def measurement_dates(request, start_time, end_time):
+    if request.method == 'GET':
+        data = Measurement.objects.all().filter(time__gte=start_time).filter(time__lte=end_time)
+        serializer = MeasurementSerializer(data, many=True)
+        return JsonResponse(serializer.data, safe=False)
