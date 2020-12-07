@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'backend',
+    'channels',
     'rest_framework.authtoken',
 ]
 

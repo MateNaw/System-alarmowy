@@ -1,3 +1,5 @@
+from datetime import datetime
+
 
 
 class Measurement(object):
@@ -20,10 +22,13 @@ class Measurement(object):
         self.window2 = window2
 
     def get(self):
-        return {'alarm': self.alarm,
-        'temp': self.temp ,
-        'gas1': self.gas1 ,
-        'gas2': self.gas2 ,
-        'move': self.move ,
-        'window1': self.window1 ,
-        'window2': self.window2}
+        return {
+            'alarm': self.alarm,
+            'temp': self.temp ,
+            'gas1': self.gas1 ,
+            'gas2': self.gas2 ,
+            'move': self.move ,
+            'window1': self.window1 ,
+            'window2': self.window2,
+            'date': datetime.now()
+                }
